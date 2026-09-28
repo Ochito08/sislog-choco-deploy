@@ -3,7 +3,11 @@ const path = require('path')
 const { hashPassword } = require('../utils/security')
 
 const DATA_DIR = path.join(__dirname, '../../data')
-const DB_FILE = path.join(DATA_DIR, 'db.json')
+
+const DB_FILE =
+  process.env.NODE_ENV === 'test'
+    ? path.join(DATA_DIR, 'db.test.json')
+    : path.join(DATA_DIR, 'db.json')
 
 function createSeed() {
   const passwordHash = hashPassword('123456')
