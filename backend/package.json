@@ -1,12 +1,14 @@
 {
-  "name": "backend",
-  "version": "1.0.0",
-  "description": "",
+  "name": "sislog-choco-backend",
+  "version": "3.0.0",
+  "description": "API REST del Sistema de Gestión Logística de Ayudas Humanitarias en el Chocó",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node --test"
   },
-  "keywords": [],
+  "keywords": ["sislog", "choco", "express", "api-rest"],
   "author": "",
   "license": "ISC",
   "type": "commonjs",

@@ -1,5 +1,19 @@
-# Vue 3 + Vite
+# SISLOG-CHOCÓ · Frontend
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Base de la Fase 1 del Sistema de Gestión Logística de Ayudas Humanitarias en el Chocó.
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## Ejecutar
+
+```bash
+npm install
+npm run dev
+```
+
+## Acceso temporal de demostración
+
+- Coordinador: `coordinador@sislog.co` / `123456`
+- Transporte: `transporte@sislog.co` / `123456`
+- Receptor: `receptor@sislog.co` / `123456`
+- Administrador: `admin@sislog.co` / `123456`
+
+> Estos usuarios son temporales del frontend. El login real se implementará en la fase del backend.
