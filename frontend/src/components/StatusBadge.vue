@@ -1,9 +1,19 @@
-<template><span class="badge" :class="statusClass"><i></i>{{ status }}</span></template>
+<template>
+  <span :class="badgeClass" class="px-2 py-1 rounded-md text-xs font-semibold">
+    {{ status }}
+  </span>
+</template>
+
 <script setup>
 import { computed } from 'vue'
-const props = defineProps({ status: { type: String, required: true } })
-const statusClass = computed(() => ({'Entregada':'delivered','En tránsito':'transit','Preparando':'preparing'}[props.status] || 'pending'))
+const props = defineProps({ status: String })
+
+const badgeClass = computed(() => {
+  switch (props.status) {
+    case 'Pendiente': return 'bg-yellow-100 text-yellow-700'
+    case 'En tránsito': return 'bg-blue-100 text-blue-700'
+    case 'Entregada': return 'bg-green-100 text-green-700'
+    default: return 'bg-gray-100 text-gray-700'
+  }
+})
 </script>
-<style scoped>
-.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:800}.badge i{width:6px;height:6px;border-radius:50%;background:currentColor}.pending{background:#fff3e5;color:#c97520}.preparing{background:#f0ecff;color:#6f55c7}.transit{background:#eaf2fb;color:#3578c7}.delivered{background:#e8f3ee;color:#28745a}
-</style>
