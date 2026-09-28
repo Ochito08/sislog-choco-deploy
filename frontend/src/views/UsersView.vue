@@ -10,12 +10,12 @@
 
     <section class="panel filters-panel">
       <form class="filters" @submit.prevent="loadUsers">
-        <input v-model.trim="filters.search" placeholder="Buscar por nombre o correo" />
-        <select v-model="filters.role">
+        <input v-model.trim="filters.search" aria-label="Buscar usuarios por nombre o correo" placeholder="Buscar por nombre o correo" />
+        <select v-model="filters.role" aria-label="Filtrar por rol">
           <option value="">Todos los roles</option>
           <option v-for="role in roles" :key="role" :value="role">{{ role }}</option>
         </select>
-        <select v-model="filters.active">
+        <select v-model="filters.active" aria-label="Filtrar por estado">
           <option value="">Todos los estados</option>
           <option value="true">Activos</option>
           <option value="false">Inactivos</option>
@@ -29,18 +29,22 @@
     <p v-if="error" class="message error">{{ error }}</p>
 
     <section class="panel users-panel">
+      <div class="users-toolbar" aria-live="polite">
+        <strong>{{ users.length }} {{ users.length === 1 ? 'usuario' : 'usuarios' }}</strong>
+        <span>{{ filters.search || filters.role || filters.active ? 'coinciden con los filtros' : 'en esta lista' }}</span>
+      </div>
       <div v-if="loading" class="empty">Consultando usuarios...</div>
       <div v-else-if="users.length" class="table-wrap">
         <table>
           <thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
           <tbody>
             <tr v-for="item in users" :key="item.id">
-              <td>
+              <td data-label="Usuario">
                 <div class="identity"><div class="avatar">{{ initials(item.name) }}</div><div><strong>{{ item.name }}</strong><span>{{ item.email }}</span></div></div>
               </td>
-              <td><span class="role">{{ item.role }}</span></td>
-              <td><span class="status" :class="item.active ? 'active' : 'inactive'">{{ item.active ? 'Activo' : 'Inactivo' }}</span></td>
-              <td>
+              <td data-label="Rol"><span class="role">{{ item.role }}</span></td>
+              <td data-label="Estado"><span class="status" :class="item.active ? 'active' : 'inactive'">{{ item.active ? 'Activo' : 'Inactivo' }}</span></td>
+              <td data-label="Acciones">
                 <div class="actions">
                   <button class="edit" @click="openEdit(item)">Editar</button>
                   <button
@@ -60,8 +64,8 @@
     </section>
 
     <div v-if="modalOpen" class="modal-backdrop" @click.self="closeModal">
-      <section class="modal" role="dialog" aria-modal="true">
-        <div class="modal-header"><div><h2>{{ editingUser ? 'Editar usuario' : 'Nuevo usuario' }}</h2><p>{{ editingUser ? 'Actualiza los datos y permisos del usuario.' : 'Crea un acceso para SISLOG-CHOCÓ.' }}</p></div><button class="close" @click="closeModal">×</button></div>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="user-modal-title">
+        <div class="modal-header"><div><h2 id="user-modal-title">{{ editingUser ? 'Editar usuario' : 'Nuevo usuario' }}</h2><p>{{ editingUser ? 'Actualiza los datos y permisos del usuario.' : 'Crea un acceso para SISLOG-CHOCÓ.' }}</p></div><button class="close" aria-label="Cerrar ventana" @click="closeModal">×</button></div>
         <form @submit.prevent="saveUser">
           <p v-if="formError" class="message error">{{ formError }}</p>
           <div class="form-grid">
@@ -216,4 +220,61 @@ onMounted(async () => {
 
 <style scoped>
 .header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.header h1{margin:0;font-size:22px}.header p{margin:5px 0 0;color:#98a2b3;font-size:11px}.primary,.secondary,.filters button,.actions button{border:0;border-radius:8px;font-size:10px;font-weight:800;cursor:pointer}.primary{padding:11px 15px;background:#164a3a;color:#fff}.secondary{padding:10px 14px;border:1px solid #d9e2dd;background:#fff;color:#667085}.panel{background:#fff;border:1px solid #e4eae7;border-radius:10px}.filters-panel{margin-bottom:12px;padding:14px}.filters{display:grid;grid-template-columns:minmax(190px,1fr) 230px 150px auto auto;gap:9px}.filters input,.filters select,.form-grid input,.form-grid select{width:100%;height:40px;padding:0 11px;border:1px solid #d9e2dd;border-radius:7px;background:#fafcfb;color:#263238;outline:none;font-size:10px}.filters button{padding:0 14px;background:#164a3a;color:#fff}.filters .secondary{background:#fff;color:#667085;border:1px solid #d9e2dd}.message{margin:0 0 12px;padding:10px 12px;border-radius:8px;font-size:10px}.message.success{background:#e8f3ee;color:#28745a}.message.error{background:#fff0f0;color:#a83b3b}.users-panel{overflow:hidden}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:13px 15px;text-align:left;border-bottom:1px solid #eef2f0;font-size:10px}th{background:#fafcfb;color:#7d8b86;font-size:9px;text-transform:uppercase;letter-spacing:.5px}.identity{display:flex;align-items:center;gap:10px}.avatar{width:34px;height:34px;display:grid;place-items:center;flex:0 0 auto;border-radius:50%;background:#e8f3ee;color:#164a3a;font-size:9px;font-weight:800}.identity strong,.identity span{display:block}.identity strong{font-size:10px}.identity span{margin-top:3px;color:#98a2b3;font-size:9px}.role{display:inline-block;max-width:250px;padding:6px 8px;border-radius:999px;background:#f4f7f5;color:#28745a;font-size:9px}.status{display:inline-block;padding:5px 8px;border-radius:999px;font-size:9px;font-weight:800}.status.active{background:#e8f3ee;color:#28745a}.status.inactive{background:#f1f3f2;color:#7d8b86}.actions{display:flex;gap:6px}.actions button{padding:7px 9px}.edit{background:#eef5f2;color:#164a3a}.toggle.deactivate{background:#fff0f0;color:#a83b3b}.toggle.activate{background:#e8f3ee;color:#28745a}.actions button:disabled{opacity:.45;cursor:not-allowed}.empty{padding:42px;text-align:center;color:#7d8b86;font-size:11px}.modal-backdrop{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:18px;background:rgba(19,39,32,.48)}.modal{width:100%;max-width:650px;max-height:90vh;overflow:auto;padding:20px;background:#fff;border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.22)}.modal-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px}.modal h2{margin:0;font-size:17px}.modal p{margin:5px 0 0;color:#98a2b3;font-size:10px}.close{border:0;background:transparent;color:#667085;font-size:24px;cursor:pointer}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-grid label{font-size:10px;font-weight:800}.form-grid input,.form-grid select{margin-top:6px}.form-grid small{display:block;margin-top:5px;color:#b33a3a;font-size:9px;font-weight:500}.modal-actions{margin-top:20px;display:flex;justify-content:flex-end;gap:9px}.modal-actions button:disabled{opacity:.6;cursor:wait}@media(max-width:900px){.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}}@media(max-width:620px){.header{align-items:flex-start;flex-direction:column}.header>.primary{width:100%}.filters{grid-template-columns:1fr}.filters input{grid-column:auto}.filters button{height:40px}.form-grid{grid-template-columns:1fr}.modal-actions{flex-direction:column-reverse}.modal-actions button{width:100%}}
+.header h1{color:#263238}
+.header p{max-width:620px;line-height:1.5}
+.primary,.secondary,.filters button,.actions button{min-height:38px;transition:background .18s ease,border-color .18s ease}
+.primary:hover,.filters button:hover{background:#28745a}
+.filters-panel{padding:16px}
+.filters{grid-template-columns:minmax(190px,1fr) minmax(170px,220px) minmax(130px,160px) auto auto;gap:10px}
+.filters input,.filters select,.form-grid input,.form-grid select{min-height:42px;font-size:12px}
+.filters input:focus,.filters select:focus,.form-grid input:focus,.form-grid select:focus{border-color:#28745a;box-shadow:0 0 0 3px rgba(40,116,90,.12)}
+.filters button{min-height:42px;font-size:11px}
+.users-toolbar{padding:14px 16px;display:flex;align-items:baseline;gap:6px;border-bottom:1px solid #eef2f0;color:#7d8b86;font-size:11px}
+.users-toolbar strong{color:#263238;font-size:13px}
+.users-panel{border-radius:10px}
+.table-wrap{overflow-x:auto}
+table{min-width:700px}
+th,td{padding:14px 16px;font-size:11px}
+th{font-size:9px}
+.identity strong{font-size:11px}
+.identity span{overflow-wrap:anywhere;font-size:10px}
+.role{font-size:10px}
+.status{font-size:10px}
+.actions{flex-wrap:wrap}
+.actions button{min-height:34px;padding:7px 10px}
+.edit:hover{background:#dfece6}
+.toggle.deactivate:hover{background:#fbe2e2}
+.toggle.activate:hover{background:#d8eee2}
+.modal{border-radius:10px}
+.modal h2{color:#263238;font-size:19px}
+.modal p{font-size:11px}
+.close{width:36px;height:36px;border-radius:7px}
+.close:hover{background:#f4f7f5;color:#263238}
+:focus-visible{outline:3px solid rgba(53,120,199,.45);outline-offset:2px}
+@media(max-width:900px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.filters input{grid-column:1/-1}}
+@media(max-width:620px){
+  .header{align-items:stretch;gap:14px}
+  .header>.primary{width:100%}
+  .filters{grid-template-columns:minmax(0,1fr);gap:8px}
+  .filters input{grid-column:auto}
+  .filters button{width:100%}
+  .table-wrap{padding:0 10px 10px;overflow:visible}
+  table{display:block;width:100%;min-width:0}
+  thead{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  tbody{display:grid;gap:10px}
+  tbody tr{display:grid;padding:5px 12px;border:1px solid #e4eae7;border-radius:8px;background:#fff}
+  tbody td{min-width:0;padding:10px 0;display:grid;grid-template-columns:76px minmax(0,1fr);align-items:center;gap:8px;border-bottom:1px solid #eef2f0}
+  tbody td:last-child{border-bottom:0}
+  tbody td::before{content:attr(data-label);color:#7d8b86;font-size:9px;font-weight:800;text-transform:uppercase}
+  .identity{min-width:0;gap:8px}
+  .identity strong,.identity span{max-width:100%;overflow-wrap:anywhere}
+  .role{max-width:100%;width:max-content;white-space:normal;border-radius:6px}
+  .actions{gap:6px}
+  .actions button{flex:1 1 auto}
+  .modal-backdrop{padding:10px;align-items:end}
+  .modal{max-height:calc(100vh - 20px);padding:16px}
+  .form-grid{gap:12px}
+  .modal-actions{flex-direction:column-reverse}
+  .modal-actions button{width:100%;min-height:40px}
+}
 </style>
