@@ -78,6 +78,8 @@ function clearFilters() {
   filters.search = ''; filters.status = ''; filters.destination = ''; filters.responsibleId = ''
   load()
 }
+<!-- módulo de entregas confirmado -->
+
 
 onMounted(async () => {
   try { responsibles.value = await listResponsibles() } catch { responsibles.value = [] }
