@@ -4,8 +4,6 @@
   </span>
 </template>
 
-<!-- prueba commit -->
-
 <script setup>
 import { computed } from 'vue'
 const props = defineProps({ status: String })

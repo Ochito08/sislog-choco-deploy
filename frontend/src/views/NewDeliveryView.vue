@@ -1,21 +1,28 @@
 <template>
-  <AppLayout title="Nueva entrega">
-    <form class="max-w-md mx-auto bg-white p-6 rounded-md shadow space-y-4">
-      <input v-model="delivery.beneficiario" placeholder="Beneficiario" class="w-full border p-2 rounded-md" />
-      <input v-model="delivery.tipo" placeholder="Tipo de ayuda" class="w-full border p-2 rounded-md" />
-      <input v-model="delivery.cantidad" type="number" placeholder="Cantidad" class="w-full border p-2 rounded-md" />
-      <button @click.prevent="save" class="w-full bg-green-700 text-white py-2 rounded-md">Guardar entrega</button>
+  <div class="p-6">
+    <h1 class="text-2xl font-bold mb-4">Registrar Nueva Entrega</h1>
+    <form @submit.prevent="crearEntrega" class="space-y-4 max-w-md">
+      <input v-model="cliente" placeholder="Nombre del cliente" class="border p-2 w-full" />
+      <select v-model="status" class="border p-2 w-full">
+        <option>Pendiente</option>
+        <option>En tránsito</option>
+        <option>Entregada</option>
+      </select>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Guardar</button>
     </form>
-  </AppLayout>
+  </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import AppLayout from '../components/AppLayout.vue'
 
-const delivery = ref({ beneficiario: '', tipo: '', cantidad: 0 })
+const cliente = ref('')
+const status = ref('Pendiente')
 
-function save() {
-  console.log('Entrega guardada:', delivery.value)
+function crearEntrega() {
+  console.log(`Entrega creada: ${cliente.value} - ${status.value}`)
+  alert(`Entrega creada para ${cliente.value} con estado ${status.value}`)
+  cliente.value = ''
+  status.value = 'Pendiente'
 }
 </script>
