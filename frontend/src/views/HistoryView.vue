@@ -1,230 +1,372 @@
 ﻿<template>
   <AppLayout title="Historial">
-    <div class="page-header">
-      <div>
-        <p class="eyebrow">TRAZABILIDAD</p>
-
-        <h1>Historial de entregas</h1>
-
-        <p class="subtitle">
-          Consulta las ayudas que completaron su recorrido logístico
-          y cuya recepción ya fue confirmada.
-        </p>
-      </div>
-    </div>
-
-    <section class="summary-grid">
-      <article>
-        <span>Entregas completadas</span>
-        <strong>{{ history.length }}</strong>
-      </article>
-
-      <article>
-        <span>Con destino visible</span>
-        <strong>{{ withDestination }}</strong>
-      </article>
-
-      <article>
-        <span>Con responsable</span>
-        <strong>{{ withResponsible }}</strong>
-      </article>
-    </section>
-
-    <section class="panel filters-panel">
-      <div class="panel-header">
+    <div class="history-page">
+      <!-- ENCABEZADO -->
+      <section class="page-header">
         <div>
-          <h2>Buscar en el historial</h2>
-
-          <p>
-            Filtra las entregas completadas por texto,
-            destino o responsable.
-          </p>
-        </div>
-      </div>
-
-      <form
-        class="filters"
-        @submit.prevent="loadHistory"
-      >
-        <label>
-          <span>Buscar</span>
-
-          <input
-            v-model.trim="filters.search"
-            type="search"
-            placeholder="Tipo de ayuda, origen..."
-          />
-        </label>
-
-        <label>
-          <span>Destino</span>
-
-          <input
-            v-model.trim="filters.destination"
-            type="text"
-            placeholder="Ej. Istmina"
-          />
-        </label>
-
-        <label>
-          <span>Responsable</span>
-
-          <select v-model="filters.responsibleId">
-            <option value="">
-              Todos los responsables
-            </option>
-
-            <option
-              v-for="person in responsibles"
-              :key="person.id"
-              :value="String(person.id)"
-            >
-              {{ person.name }}
-            </option>
-          </select>
-        </label>
-
-        <div class="filter-actions">
-          <button
-            type="submit"
-            class="primary"
-            :disabled="loading"
-          >
-            {{ loading ? 'Consultando...' : 'Aplicar' }}
-          </button>
-
-          <button
-            type="button"
-            class="secondary"
-            @click="clearFilters"
-          >
-            Limpiar
-          </button>
-        </div>
-      </form>
-    </section>
-
-    <p
-      v-if="error"
-      class="message error"
-    >
-      {{ error }}
-    </p>
-
-    <section class="panel history-panel">
-      <div class="panel-header">
-        <div>
-          <h2>Entregas completadas</h2>
-
-          <p>
-            {{ history.length }}
-            registro{{ history.length === 1 ? '' : 's' }}
-          </p>
-        </div>
-
-        <span class="history-badge">
-          Entregadas
-        </span>
-      </div>
-
-      <div
-        v-if="loading"
-        class="empty-state"
-      >
-        Cargando historial...
-      </div>
-
-      <div
-        v-else-if="!history.length"
-        class="empty-state"
-      >
-        <div class="empty-icon">✓</div>
-
-        <strong>
-          No hay entregas completadas
-        </strong>
-
-        <span>
-          Prueba cambiando los filtros de búsqueda.
-        </span>
-      </div>
-
-      <div
-        v-else
-        class="history-list"
-      >
-        <article
-          v-for="item in history"
-          :key="item.id"
-          class="history-card"
-        >
-          <div class="delivery-icon">
-            ✓
+          <div class="eyebrow">
+            <span></span>
+            Trazabilidad
           </div>
 
-          <div class="history-content">
-            <div class="history-heading">
-              <div>
-                <span class="delivery-id">
-                  Entrega #{{ item.id }}
-                </span>
+          <h1>Historial de entregas</h1>
 
-                <h3>
-                  {{ item.tipo || 'Ayuda humanitaria' }}
-                </h3>
+          <p class="subtitle">
+            Consulta las ayudas humanitarias que completaron su recorrido
+            logístico y cuya recepción ya fue confirmada.
+          </p>
+        </div>
+      </section>
+
+      <!-- RESUMEN -->
+      <section class="summary-grid">
+        <article class="summary-card">
+          <div class="summary-icon delivered">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9" />
+              <path d="m7 12 3 3 7-7" />
+            </svg>
+          </div>
+
+          <div>
+            <span>Entregas completadas</span>
+            <strong>{{ history.length }}</strong>
+            <small>Recepciones confirmadas</small>
+          </div>
+        </article>
+
+        <article class="summary-card">
+          <div class="summary-icon destination">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z" />
+              <circle cx="12" cy="10" r="2" />
+            </svg>
+          </div>
+
+          <div>
+            <span>Con destino visible</span>
+            <strong>{{ withDestination }}</strong>
+            <small>Operaciones ubicadas</small>
+          </div>
+        </article>
+
+        <article class="summary-card">
+          <div class="summary-icon responsible">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="3" />
+              <path d="M6 19c.5-3.4 2.5-5 6-5s5.5 1.6 6 5" />
+            </svg>
+          </div>
+
+          <div>
+            <span>Con responsable</span>
+            <strong>{{ withResponsible }}</strong>
+            <small>Responsables asignados</small>
+          </div>
+        </article>
+      </section>
+
+      <!-- FILTROS -->
+      <section class="panel filters-panel">
+        <header class="panel-header">
+          <div>
+            <span class="panel-kicker">
+              BÚSQUEDA
+            </span>
+
+            <h2>Buscar en el historial</h2>
+
+            <p>
+              Filtra las entregas completadas por texto, destino o responsable.
+            </p>
+          </div>
+
+          <div class="filter-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 6h16" />
+              <path d="M7 12h10" />
+              <path d="M10 18h4" />
+            </svg>
+          </div>
+        </header>
+
+        <form
+          class="filters"
+          @submit.prevent="loadHistory"
+        >
+          <label>
+            <span>Buscar</span>
+
+            <div class="input-wrap">
+              <svg viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="6" />
+                <path d="m16 16 4 4" />
+              </svg>
+
+              <input
+                v-model.trim="filters.search"
+                type="search"
+                placeholder="Tipo de ayuda, origen..."
+              />
+            </div>
+          </label>
+
+          <label>
+            <span>Destino</span>
+
+            <div class="input-wrap">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z" />
+                <circle cx="12" cy="10" r="2" />
+              </svg>
+
+              <input
+                v-model.trim="filters.destination"
+                type="text"
+                placeholder="Ej. Istmina"
+              />
+            </div>
+          </label>
+
+          <label>
+            <span>Responsable</span>
+
+            <select v-model="filters.responsibleId">
+              <option value="">
+                Todos los responsables
+              </option>
+
+              <option
+                v-for="person in responsibles"
+                :key="person.id"
+                :value="String(person.id)"
+              >
+                {{ person.name }}
+              </option>
+            </select>
+          </label>
+
+          <div class="filter-actions">
+            <button
+              type="submit"
+              class="primary"
+              :disabled="loading"
+            >
+              {{
+                loading
+                  ? 'Consultando...'
+                  : 'Aplicar'
+              }}
+            </button>
+
+            <button
+              type="button"
+              class="secondary"
+              @click="clearFilters"
+            >
+              Limpiar
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ERROR -->
+      <div
+        v-if="error"
+        class="message error"
+      >
+        <div class="message-icon">
+          !
+        </div>
+
+        <div>
+          <strong>
+            No fue posible cargar el historial
+          </strong>
+
+          <span>
+            {{ error }}
+          </span>
+        </div>
+      </div>
+
+      <!-- LISTADO -->
+      <section class="panel history-panel">
+        <header class="panel-header list-header">
+          <div>
+            <span class="panel-kicker">
+              OPERACIONES FINALIZADAS
+            </span>
+
+            <h2>Entregas completadas</h2>
+
+            <p>
+              {{ history.length }}
+              registro{{ history.length === 1 ? '' : 's' }}
+              encontrado{{ history.length === 1 ? '' : 's' }}
+            </p>
+          </div>
+
+          <span class="history-badge">
+            <i></i>
+            Entregadas
+          </span>
+        </header>
+
+        <!-- CARGANDO -->
+        <div
+          v-if="loading"
+          class="empty-state"
+        >
+          <div class="loader"></div>
+
+          <strong>
+            Cargando historial
+          </strong>
+
+          <span>
+            Estamos consultando las operaciones completadas.
+          </span>
+        </div>
+
+        <!-- VACÍO -->
+        <div
+          v-else-if="!history.length"
+          class="empty-state"
+        >
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9" />
+              <path d="m7 12 3 3 7-7" />
+            </svg>
+          </div>
+
+          <strong>
+            No hay entregas completadas
+          </strong>
+
+          <span>
+            Prueba cambiando los filtros de búsqueda.
+          </span>
+        </div>
+
+        <!-- HISTORIAL -->
+        <div
+          v-else
+          class="history-list"
+        >
+          <article
+            v-for="item in history"
+            :key="item.id"
+            class="history-card"
+          >
+            <div class="delivery-icon">
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" />
+                <path d="m7 12 3 3 7-7" />
+              </svg>
+            </div>
+
+            <div class="history-content">
+              <div class="history-heading">
+                <div>
+                  <span class="delivery-id">
+                    Entrega #{{ item.id }}
+                  </span>
+
+                  <h3>
+                    {{ item.tipo || 'Ayuda humanitaria' }}
+                  </h3>
+                </div>
+
+                <span class="status">
+                  <i></i>
+                  Entregada
+                </span>
               </div>
 
-              <span class="status">
-                Entregada
-              </span>
+              <div class="route">
+                <div>
+                  <span>Origen</span>
+                  <strong>
+                    {{ item.origen || '—' }}
+                  </strong>
+                </div>
+
+                <div class="route-line">
+                  <span></span>
+
+                  <svg viewBox="0 0 24 24">
+                    <path d="M5 12h14" />
+                    <path d="m15 8 4 4-4 4" />
+                  </svg>
+                </div>
+
+                <div>
+                  <span>Destino</span>
+                  <strong>
+                    {{ item.destino || '—' }}
+                  </strong>
+                </div>
+              </div>
+
+              <div class="meta">
+                <span>
+                  <svg viewBox="0 0 24 24">
+                    <path d="M5 7h14v12H5z" />
+                    <path d="M8 7V5h8v2" />
+                  </svg>
+
+                  <strong>Cantidad:</strong>
+                  {{ item.cantidad ?? '—' }}
+                </span>
+
+                <span>
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="8" r="3" />
+                    <path d="M6 19c.5-3.4 2.5-5 6-5s5.5 1.6 6 5" />
+                  </svg>
+
+                  <strong>Responsable:</strong>
+                  {{ item.responsable || 'Sin asignar' }}
+                </span>
+
+                <span>
+                  <svg viewBox="0 0 24 24">
+                    <path d="M3 7h11v9H3z" />
+                    <path d="M14 10h3l3 3v3h-6z" />
+                  </svg>
+
+                  <strong>Transporte:</strong>
+                  {{ item.transporte || '—' }}
+                </span>
+
+                <span>
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="8" />
+                    <path d="M12 8v4l3 2" />
+                  </svg>
+
+                  <strong>Recepción:</strong>
+                  {{ formatDateTime(item.receivedAt || item.updatedAt) }}
+                </span>
+              </div>
             </div>
 
-            <div class="route">
-              <span>
-                {{ item.origen || '—' }}
-              </span>
+            <RouterLink
+              :to="`/entregas/${item.id}`"
+              class="detail-link"
+            >
+              <span>Ver detalle</span>
 
-              <span class="arrow">
-                →
-              </span>
-
-              <span>
-                {{ item.destino || '—' }}
-              </span>
-            </div>
-
-            <div class="meta">
-              <span>
-                <strong>Cantidad:</strong>
-                {{ item.cantidad ?? '—' }}
-              </span>
-
-              <span>
-                <strong>Responsable:</strong>
-                {{ item.responsable || 'Sin asignar' }}
-              </span>
-
-              <span>
-                <strong>Transporte:</strong>
-                {{ item.transporte || '—' }}
-              </span>
-
-              <span>
-                <strong>Recepción:</strong>
-                {{ formatDateTime(item.receivedAt || item.updatedAt) }}
-              </span>
-            </div>
-          </div>
-
-          <RouterLink
-            :to="`/entregas/${item.id}`"
-            class="detail-link"
-          >
-            Ver detalle →
-          </RouterLink>
-        </article>
-      </div>
-    </section>
+              <svg viewBox="0 0 24 24">
+                <path d="m9 6 6 6-6 6" />
+              </svg>
+            </RouterLink>
+          </article>
+        </div>
+      </section>
+    </div>
   </AppLayout>
 </template>
 
@@ -258,11 +400,15 @@ const filters = reactive({
 })
 
 const withDestination = computed(() =>
-  history.value.filter(item => item.destino).length
+  history.value.filter(
+    item => item.destino
+  ).length
 )
 
 const withResponsible = computed(() =>
-  history.value.filter(item => item.responsableId).length
+  history.value.filter(
+    item => item.responsableId
+  ).length
 )
 
 async function loadHistory() {
@@ -270,9 +416,11 @@ async function loadHistory() {
   error.value = ''
 
   try {
-    history.value = await listHistory(filters)
+    history.value =
+      await listHistory(filters)
   } catch (err) {
-    error.value = err.message
+    error.value =
+      err.message
   } finally {
     loading.value = false
   }
@@ -280,7 +428,8 @@ async function loadHistory() {
 
 async function loadResponsibles() {
   try {
-    responsibles.value = await listResponsibles()
+    responsibles.value =
+      await listResponsibles()
   } catch {
     responsibles.value = []
   }
@@ -299,13 +448,18 @@ function formatDateTime(value) {
     return '—'
   }
 
-  return new Intl.DateTimeFormat('es-CO', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(new Date(value))
+  return new Intl.DateTimeFormat(
+    'es-CO',
+    {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }
+  ).format(
+    new Date(value)
+  )
 }
 
 onMounted(async () => {
@@ -317,200 +471,590 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+}
+
+.history-page {
+  width: 100%;
+}
+
+/* HEADER */
+
 .page-header {
-  margin-bottom: 22px;
+  margin-bottom: 24px;
 }
 
 .eyebrow {
-  margin: 0 0 5px;
-  color: #28745a;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  margin-bottom: 7px;
+
+  color:
+    var(--color-primary);
+
+  font-size: 12px;
+  font-weight: 900;
+
+  letter-spacing: 1.15px;
+  text-transform: uppercase;
+}
+
+.eyebrow > span {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  background:
+    var(--color-accent);
+
+  box-shadow:
+    0 0 0 4px
+    rgba(239, 183, 46, 0.12);
 }
 
 h1 {
   margin: 0;
-  color: #263238;
-  font-size: 27px;
+
+  color:
+    var(--text-primary);
+
+  font-size:
+    clamp(
+      28px,
+      3vw,
+      38px
+    );
+
+  font-weight: 850;
+  letter-spacing: -0.8px;
 }
 
 .subtitle {
-  max-width: 650px;
-  margin: 7px 0 0;
-  color: #98a2b3;
-  font-size: 11px;
-  line-height: 1.5;
+  max-width: 720px;
+
+  margin: 9px 0 0;
+
+  color:
+    var(--text-muted);
+
+  font-size: 14px;
+  line-height: 1.6;
 }
+
+/* RESUMEN */
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 14px;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  gap: 16px;
+
+  margin-bottom: 20px;
 }
 
-.summary-grid article {
-  padding: 17px 18px;
-  border: 1px solid #e4eae7;
-  border-radius: 10px;
-  background: #fff;
+.summary-card {
+  min-height: 125px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 19px;
+
+  border:
+    1px solid
+    var(--border-color);
+
+  border-radius:
+    var(--radius-lg);
+
+  background:
+    var(--bg-surface);
+
+  box-shadow:
+    var(--shadow-sm);
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
-.summary-grid span {
-  color: #7d8b86;
-  font-size: 10px;
-  font-weight: 700;
+.summary-card:hover {
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    var(--shadow-md);
 }
 
-.summary-grid strong {
+.summary-icon {
+  width: 48px;
+  height: 48px;
+
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 auto;
+
+  border-radius: 14px;
+}
+
+.summary-icon svg {
+  width: 22px;
+  height: 22px;
+
+  fill: none;
+  stroke: currentColor;
+
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.summary-icon.delivered {
+  background:
+    var(--color-success-soft);
+
+  color:
+    var(--color-success);
+}
+
+.summary-icon.destination {
+  background:
+    var(--color-info-soft);
+
+  color:
+    var(--color-info);
+}
+
+.summary-icon.responsible {
+  background:
+    var(--color-primary-soft);
+
+  color:
+    var(--color-primary);
+}
+
+.summary-card span,
+.summary-card strong,
+.summary-card small {
   display: block;
-  margin-top: 7px;
-  color: #263238;
-  font-size: 23px;
 }
+
+.summary-card span {
+  color:
+    var(--text-secondary);
+
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.summary-card strong {
+  margin-top: 3px;
+
+  color:
+    var(--text-primary);
+
+  font-size: 29px;
+  line-height: 1.1;
+}
+
+.summary-card small {
+  margin-top: 4px;
+
+  color:
+    var(--text-muted);
+
+  font-size: 11px;
+}
+
+/* PANEL */
 
 .panel {
-  margin-bottom: 14px;
   overflow: hidden;
-  border: 1px solid #e4eae7;
-  border-radius: 10px;
-  background: #fff;
+
+  margin-bottom: 20px;
+
+  border:
+    1px solid
+    var(--border-color);
+
+  border-radius:
+    var(--radius-lg);
+
+  background:
+    var(--bg-surface);
+
+  box-shadow:
+    var(--shadow-sm);
 }
 
 .panel-header {
-  min-height: 72px;
+  min-height: 94px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 16px 18px;
-  border-bottom: 1px solid #eef2f0;
+
+  gap: 16px;
+
+  padding: 20px 22px;
+
+  border-bottom:
+    1px solid
+    var(--border-soft);
+}
+
+.panel-kicker {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color:
+    var(--color-primary);
+
+  font-size: 10px;
+  font-weight: 900;
+
+  letter-spacing: 1.2px;
 }
 
 .panel-header h2 {
   margin: 0;
-  color: #263238;
-  font-size: 14px;
+
+  color:
+    var(--text-primary);
+
+  font-size: 19px;
 }
 
 .panel-header p {
-  margin: 4px 0 0;
-  color: #98a2b3;
-  font-size: 10px;
+  margin: 5px 0 0;
+
+  color:
+    var(--text-muted);
+
+  font-size: 13px;
 }
+
+.filter-icon {
+  width: 42px;
+  height: 42px;
+
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 auto;
+
+  border-radius: 12px;
+
+  background:
+    var(--color-primary-soft);
+
+  color:
+    var(--color-primary);
+}
+
+.filter-icon svg {
+  width: 19px;
+  height: 19px;
+
+  fill: none;
+  stroke: currentColor;
+
+  stroke-width: 1.9;
+  stroke-linecap: round;
+}
+
+/* FILTROS */
 
 .filters {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr auto;
-  gap: 12px;
-  padding: 16px 18px;
+
+  grid-template-columns:
+    1.2fr
+    1fr
+    1fr
+    auto;
+
+  gap: 14px;
+
+  padding: 20px 22px;
+
   align-items: end;
 }
 
-label span {
+label > span {
   display: block;
-  margin-bottom: 6px;
-  color: #667085;
-  font-size: 10px;
-  font-weight: 800;
+
+  margin-bottom: 7px;
+
+  color:
+    var(--text-secondary);
+
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.input-wrap {
+  position: relative;
+}
+
+.input-wrap svg {
+  width: 17px;
+  height: 17px;
+
+  position: absolute;
+
+  left: 13px;
+  top: 50%;
+
+  transform:
+    translateY(-50%);
+
+  fill: none;
+  stroke:
+    var(--text-muted);
+
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  pointer-events: none;
 }
 
 input,
 select {
   width: 100%;
-  min-height: 42px;
-  padding: 0 11px;
-  border: 1px solid #dfe7e3;
-  border-radius: 8px;
-  background: #fff;
-  color: #263238;
-  font-size: 11px;
+  min-height: 48px;
+
+  padding: 0 13px;
+
+  border:
+    1px solid
+    var(--border-color);
+
+  border-radius: 11px;
+
+  background:
+    var(--bg-surface-secondary);
+
+  color:
+    var(--text-primary);
+
+  font-size: 14px;
+
   outline: none;
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.input-wrap input {
+  padding-left: 40px;
+}
+
+input::placeholder {
+  color:
+    var(--text-faint);
+}
+
+select option {
+  background:
+    var(--bg-surface);
+
+  color:
+    var(--text-primary);
 }
 
 input:focus,
 select:focus {
-  border-color: #6aa4dc;
-  box-shadow: 0 0 0 3px rgba(106, 164, 220, .13);
+  border-color:
+    var(--color-primary);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(39, 116, 90, 0.12);
 }
 
 .filter-actions {
   display: flex;
-  gap: 8px;
+  gap: 9px;
 }
 
 .primary,
 .secondary {
-  min-height: 42px;
-  padding: 0 14px;
-  border-radius: 8px;
-  font-size: 11px;
+  min-height: 48px;
+
+  padding: 0 16px;
+
+  border-radius: 11px;
+
+  font-size: 14px;
   font-weight: 800;
+
   cursor: pointer;
 }
 
 .primary {
   border: 0;
-  background: #164a3a;
-  color: #fff;
+
+  background:
+    var(--color-primary);
+
+  color: #ffffff;
+
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
 }
 
 .primary:hover {
-  background: #28745a;
+  background:
+    var(--color-primary-hover);
+
+  transform:
+    translateY(-1px);
 }
 
 .primary:disabled {
-  opacity: .65;
+  opacity: 0.65;
+
   cursor: wait;
+  transform: none;
 }
 
 .secondary {
-  border: 1px solid #dfe7e3;
-  background: #fff;
-  color: #475467;
+  border:
+    1px solid
+    var(--border-color);
+
+  background:
+    var(--bg-surface-secondary);
+
+  color:
+    var(--text-secondary);
 }
 
 .secondary:hover {
-  background: #f6f8f7;
+  background:
+    var(--color-primary-soft);
+
+  color:
+    var(--color-primary);
 }
 
+/* BADGE */
+
 .history-badge {
-  padding: 7px 10px;
+  min-height: 34px;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 0 11px;
+
   border-radius: 999px;
-  background: #e8f3ee;
-  color: #28745a;
-  font-size: 9px;
-  font-weight: 800;
+
+  background:
+    var(--color-success-soft);
+
+  color:
+    var(--color-success);
+
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.history-badge i {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background:
+    currentColor;
+}
+
+/* LISTA */
+
+.history-list {
+  padding: 10px;
 }
 
 .history-card {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 18px;
-  border-bottom: 1px solid #eef2f0;
-}
 
-.history-card:last-child {
-  border-bottom: 0;
+  gap: 16px;
+
+  padding: 18px 16px;
+
+  border:
+    1px solid transparent;
+
+  border-radius: 14px;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
 }
 
 .history-card:hover {
-  background: #fbfcfb;
+  border-color:
+    var(--border-color);
+
+  background:
+    var(--bg-surface-secondary);
+
+  transform:
+    translateX(2px);
 }
 
 .delivery-icon {
-  width: 40px;
-  height: 40px;
-  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+
   display: grid;
   place-items: center;
-  border-radius: 10px;
-  background: #e8f3ee;
-  color: #28745a;
-  font-size: 16px;
-  font-weight: 900;
+
+  flex: 0 0 auto;
+
+  border-radius: 14px;
+
+  background:
+    var(--color-success-soft);
+
+  color:
+    var(--color-success);
+}
+
+.delivery-icon svg {
+  width: 22px;
+  height: 22px;
+
+  fill: none;
+  stroke: currentColor;
+
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .history-content {
@@ -522,126 +1066,375 @@ select:focus {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+
   gap: 14px;
 }
 
 .delivery-id {
-  color: #98a2b3;
-  font-size: 9px;
-  font-weight: 700;
+  color:
+    var(--text-muted);
+
+  font-size: 11px;
+  font-weight: 750;
 }
 
 .history-heading h3 {
-  margin: 4px 0 0;
-  color: #263238;
-  font-size: 13px;
+  margin: 3px 0 0;
+
+  color:
+    var(--text-primary);
+
+  font-size: 17px;
 }
 
 .status {
-  padding: 6px 9px;
+  min-height: 29px;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  flex: 0 0 auto;
+
+  padding: 0 10px;
+
   border-radius: 999px;
-  background: #e8f3ee;
-  color: #28745a;
-  font-size: 9px;
-  font-weight: 800;
-  white-space: nowrap;
+
+  background:
+    var(--color-success-soft);
+
+  color:
+    var(--color-success);
+
+  font-size: 11px;
+  font-weight: 850;
 }
+
+.status i {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background:
+    currentColor;
+}
+
+/* RUTA */
 
 .route {
-  margin-top: 8px;
   display: flex;
   align-items: center;
-  gap: 7px;
-  color: #475467;
-  font-size: 10px;
-  font-weight: 700;
+
+  gap: 11px;
+
+  margin-top: 11px;
 }
 
-.arrow {
-  color: #98a2b3;
+.route > div:not(.route-line) {
+  min-width: 0;
 }
+
+.route span,
+.route strong {
+  display: block;
+}
+
+.route span {
+  color:
+    var(--text-muted);
+
+  font-size: 10px;
+  font-weight: 750;
+
+  text-transform: uppercase;
+}
+
+.route strong {
+  margin-top: 2px;
+
+  color:
+    var(--text-secondary);
+
+  font-size: 13px;
+}
+
+.route-line {
+  min-width: 50px;
+
+  display: flex;
+  align-items: center;
+
+  color:
+    var(--text-muted);
+}
+
+.route-line > span {
+  width: 34px;
+  height: 1px;
+
+  background:
+    var(--border-color);
+}
+
+.route-line svg {
+  width: 14px;
+  height: 14px;
+
+  fill: none;
+  stroke: currentColor;
+
+  stroke-width: 1.6;
+}
+
+/* META */
 
 .meta {
-  margin-top: 9px;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 18px;
-  color: #667085;
-  font-size: 10px;
+
+  gap: 9px 18px;
+
+  margin-top: 12px;
+}
+
+.meta > span {
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  color:
+    var(--text-muted);
+
+  font-size: 12px;
 }
 
 .meta strong {
-  color: #475467;
+  color:
+    var(--text-secondary);
 }
 
+.meta svg {
+  width: 14px;
+  height: 14px;
+
+  fill: none;
+  stroke: currentColor;
+
+  stroke-width: 1.7;
+}
+
+/* DETALLE */
+
 .detail-link {
+  min-height: 40px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
   flex: 0 0 auto;
-  color: #28745a;
+
+  padding: 0 10px;
+
+  border-radius: 10px;
+
+  color:
+    var(--color-primary);
+
   text-decoration: none;
-  font-size: 11px;
-  font-weight: 800;
-  white-space: nowrap;
+
+  font-size: 13px;
+  font-weight: 850;
 }
 
 .detail-link:hover {
-  text-decoration: underline;
+  background:
+    var(--color-primary-soft);
 }
 
+.detail-link svg {
+  width: 16px;
+  height: 16px;
+
+  fill: none;
+  stroke: currentColor;
+
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* VACÍO */
+
 .empty-state {
-  min-height: 180px;
+  min-height: 220px;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
   gap: 7px;
-  padding: 30px;
-  color: #98a2b3;
+
+  padding: 35px;
+
   text-align: center;
-  font-size: 11px;
 }
 
 .empty-state strong {
-  color: #475467;
+  color:
+    var(--text-primary);
+
+  font-size: 15px;
+}
+
+.empty-state span {
+  color:
+    var(--text-muted);
+
   font-size: 13px;
 }
 
 .empty-icon {
-  width: 42px;
-  height: 42px;
-  margin-bottom: 4px;
+  width: 54px;
+  height: 54px;
+
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  background: #e8f3ee;
-  color: #28745a;
-  font-size: 17px;
-  font-weight: 900;
+
+  margin-bottom: 6px;
+
+  border-radius: 15px;
+
+  background:
+    var(--color-success-soft);
+
+  color:
+    var(--color-success);
 }
 
+.empty-icon svg {
+  width: 24px;
+  height: 24px;
+
+  fill: none;
+  stroke: currentColor;
+
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.loader {
+  width: 38px;
+  height: 38px;
+
+  margin-bottom: 7px;
+
+  border:
+    3px solid
+    var(--border-color);
+
+  border-top-color:
+    var(--color-primary);
+
+  border-radius: 50%;
+
+  animation:
+    spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform:
+      rotate(360deg);
+  }
+}
+
+/* ERROR */
+
 .message {
-  margin-bottom: 14px;
-  padding: 12px 14px;
-  border-radius: 8px;
-  font-size: 11px;
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  margin-bottom: 18px;
+
+  padding: 14px 16px;
+
+  border-radius: 12px;
 }
 
 .message.error {
-  border: 1px solid #f2cccc;
-  background: #fff0f0;
-  color: #a83b3b;
+  border:
+    1px solid
+    var(--color-danger);
+
+  background:
+    var(--color-danger-soft);
+
+  color:
+    var(--color-danger);
 }
 
-@media (max-width: 950px) {
+.message-icon {
+  width: 35px;
+  height: 35px;
+
+  display: grid;
+  place-items: center;
+
+  flex: 0 0 auto;
+
+  border-radius: 10px;
+
+  background:
+    rgba(201, 74, 67, 0.1);
+
+  font-weight: 900;
+}
+
+.message strong,
+.message span {
+  display: block;
+}
+
+.message strong {
+  color:
+    var(--text-primary);
+
+  font-size: 13px;
+}
+
+.message span {
+  margin-top: 2px;
+
+  color:
+    var(--color-danger);
+
+  font-size: 12px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1000px) {
   .filters {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+      1fr 1fr;
   }
 
   .filter-actions {
-    grid-column: 1 / -1;
+    grid-column:
+      1 / -1;
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 760px) {
   .summary-grid {
     grid-template-columns: 1fr;
   }
@@ -651,18 +1444,14 @@ select:focus {
     flex-wrap: wrap;
   }
 
-  .history-heading {
-    flex-direction: column;
-  }
-
   .detail-link {
-    margin-left: 54px;
+    margin-left: 64px;
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 560px) {
   h1 {
-    font-size: 23px;
+    font-size: 28px;
   }
 
   .filters {
@@ -677,6 +1466,29 @@ select:focus {
   .primary,
   .secondary {
     width: 100%;
+  }
+
+  .history-heading {
+    flex-direction: column;
+  }
+
+  .delivery-icon {
+    display: none;
+  }
+
+  .route {
+    flex-wrap: wrap;
+  }
+
+  .detail-link {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+  }
+
+  .list-header {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 </style>
