@@ -6,6 +6,13 @@ const PORT = Number(process.env.PORT) || 3000
 ensureDatabase()
 
 app.listen(PORT, () => {
-  console.log(`SISLOG-CHOCÓ API escuchando en http://localhost:${PORT}`)
-  console.log(`Health: http://localhost:${PORT}/api/health`)
+  console.log('')
+  console.log('==============================================')
+  console.log('       SISLOG-CHOCÓ API INICIADA')
+  console.log('==============================================')
+  console.log(`API:     http://localhost:${PORT}`)
+  console.log(`Health:  http://localhost:${PORT}/api/health`)
+  console.log(`Swagger: http://localhost:${PORT}/api-docs`)
+  console.log('==============================================')
+  console.log('')
 })

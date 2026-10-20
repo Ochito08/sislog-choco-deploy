@@ -8,12 +8,19 @@
     "dev": "node --watch index.js",
     "test": "set NODE_ENV=test&& node --test"
   },
-  "keywords": ["sislog", "choco", "express", "api-rest"],
+  "keywords": [
+    "sislog",
+    "choco",
+    "express",
+    "api-rest"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1"
   }
 }
