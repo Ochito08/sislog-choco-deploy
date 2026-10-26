@@ -39,6 +39,12 @@
             <p>Ingresa tus datos para continuar con la gestión de las ayudas humanitarias.</p>
           </header>
 
+          <div v-if="route.query.session === 'unavailable'" class="form-error" role="alert">
+            <div>
+              <p>No pudimos verificar tu sesión. Puedes reintentarlo sin perderla o iniciar sesión de nuevo.</p>
+              <button class="visibility-button session-retry" type="button" :disabled="loading" @click="retrySession">Reintentar sesión</button>
+            </div>
+          </div>
           <form class="login-form" @submit.prevent="submit" :aria-busy="loading">
             <div class="field">
               <label for="login-email">Correo electrónico</label>
@@ -79,10 +85,11 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { login } from '../services/auth'
+import { useRoute, useRouter } from 'vue-router'
+import { login, refreshCurrentUser } from '../services/auth'
 
 const router = useRouter()
+const route = useRoute()
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
@@ -90,11 +97,25 @@ const error = ref('')
 const loading = ref(false)
 
 async function submit() {
+  if (loading.value) return
   error.value = ''
   loading.value = true
   try {
     await login(email.value, password.value)
-    router.push('/dashboard')
+    await router.push('/dashboard')
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    loading.value = false
+  }
+}
+async function retrySession() {
+  if (loading.value) return
+  loading.value = true
+  error.value = ''
+  try {
+    await refreshCurrentUser()
+    await router.push('/dashboard')
   } catch (e) {
     error.value = e.message
   } finally {
@@ -104,6 +125,7 @@ async function submit() {
 </script>
 
 <style scoped>
+button.session-retry{position:static;transform:none;padding:6px 10px;background:#fff}
 .login-page{--ink:#173d32;--green:#164a3a;--gold:#d4a72c;min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:clamp(16px,4vw,48px);background:radial-gradient(circle at 7% 12%,#e1efe7 0,transparent 34%),radial-gradient(circle at 90% 88%,#eee9d5 0,transparent 34%),#f5f7f3;color:#1b3029}
 .login-shell{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.02fr);width:min(1100px,100%);min-height:min(700px,calc(100dvh - 56px));overflow:hidden;border:1px solid #e6ebe6;border-radius:26px;background:#fff;box-shadow:0 30px 90px rgba(21,61,45,.13),0 4px 18px rgba(21,61,45,.04)}
 .story-panel{position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;padding:clamp(34px,4.3vw,58px);background:linear-gradient(152deg,#164a3a 0%,#113c30 58%,#0c2b26 100%);color:#fff}

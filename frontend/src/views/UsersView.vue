@@ -17,7 +17,7 @@
         <span class="overview-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3.1a4 4 0 0 1 0 7.8M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg>
         </span>
-        <div class="overview-text"><span>USUARIOS EN LA LISTA</span><strong>{{ loading ? '—' : users.length }}</strong></div>
+        <div class="overview-text"><span>USUARIOS EN LA LISTA</span><strong>{{ loading || usersError ? '—' : users.length }}</strong></div>
         <div class="overview-separator" aria-hidden="true"></div>
         <p class="overview-description">Controla los accesos de administradores, coordinadores, transportadores y receptores desde un solo lugar.</p>
         <span class="overview-label"><span class="online-dot" aria-hidden="true"></span> Panel de administración</span>
@@ -76,7 +76,7 @@
       <section class="panel directory-panel" aria-labelledby="directory-title">
         <div class="directory-heading">
           <div><h2 id="directory-title">Directorio de usuarios</h2><p>Consulta y administra las cuentas registradas.</p></div>
-          <span class="count-badge" aria-live="polite">{{ loading ? 'Consultando...' : usersError ? 'Sin resultados disponibles' : `${users.length} ${users.length === 1 ? 'resultado' : 'resultados'}` }}</span>
+          <span class="count-badge" aria-live="polite">{{ loading ? 'Consultando...' : usersError ? 'Consulta no disponible' : `${users.length} ${users.length === 1 ? 'resultado' : 'resultados'}` }}</span>
         </div>
 
         <div v-if="loading" class="empty-state" role="status">
@@ -108,7 +108,7 @@
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5 4 4M4 20l4.5-1 11-11a2.8 2.8 0 0 0-4-4l-11 11L4 20Z"/></svg>
                       Editar
                     </button>
-                    <button class="action-button status-button" :class="item.active ? 'deactivate' : 'activate'" type="button" :disabled="savingId === item.id || (item.id === currentUser?.id && item.active)" :title="item.id === currentUser?.id && item.active ? 'No puedes desactivar tu propia cuenta' : ''" :aria-label="`${item.active ? 'Desactivar' : 'Activar'} a ${item.name}`" @click="toggleStatus(item)">
+                    <button class="action-button status-button" :class="item.active ? 'deactivate' : 'activate'" type="button" :disabled="savingId !== null || (item.id === currentUser?.id && item.active)" :title="item.id === currentUser?.id && item.active ? 'No puedes desactivar tu propia cuenta' : ''" :aria-label="`${item.active ? 'Desactivar' : 'Activar'} a ${item.name}`" @click="toggleStatus(item)">
                       {{ savingId === item.id ? 'Guardando...' : item.active ? 'Desactivar' : 'Activar' }}
                     </button>
                   </div>
@@ -128,7 +128,7 @@
       </section>
 
       <div v-if="modalOpen">
-        <dialog ref="modalRef" class="modal" aria-modal="true" aria-labelledby="user-modal-title" aria-describedby="user-modal-description" tabindex="-1" @cancel.prevent="closeModal" @click="closeOnBackdrop">
+        <dialog ref="modalRef" class="modal" aria-modal="true" aria-labelledby="user-modal-title" aria-describedby="user-modal-description" tabindex="-1" @cancel.prevent="closeModal" @keydown.tab="trapFocus" @click="closeOnBackdrop">
           <div class="modal-heading">
             <div>
               <span class="modal-eyebrow">GESTIÓN DE ACCESOS</span>
@@ -137,8 +137,12 @@
             </div>
             <button class="close-button" type="button" aria-label="Cerrar ventana" :disabled="formSaving" @click="closeModal">×</button>
           </div>
-          <form class="user-form" :aria-busy="formSaving" @submit.prevent="saveUser">
+          <form class="user-form" novalidate :aria-busy="formSaving" @submit.prevent="saveUser">
             <p v-if="formError" ref="formErrorRef" tabindex="-1" class="notice notice-error" role="alert">{{ formError }}</p>
+            <div v-if="rolesError" class="notice notice-error" role="alert">
+              {{ rolesError }}
+              <button class="button button-secondary" type="button" :disabled="rolesLoading" @click="loadRoles">Reintentar roles</button>
+            </div>
             <div class="form-grid">
               <label class="form-field">Nombre completo
                 <input v-model.trim="form.name" autocomplete="name" maxlength="100" placeholder="Ej. María Córdoba" :aria-invalid="Boolean(fieldErrors.name)" :aria-describedby="fieldErrors.name ? 'user-name-error' : undefined" :disabled="formSaving" />
@@ -293,18 +297,53 @@ async function restoreFocus() {
   else headingRef.value?.focus()
 }
 
+function trapFocus(event) {
+  const dialog = modalRef.value
+  const controls = Array.from(dialog.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), [tabindex="0"]'))
+    .filter(control => control.getClientRects().length)
+  const first = controls[0]
+  const last = controls[controls.length - 1]
+  if (!first) {
+    event.preventDefault()
+    dialog.focus()
+  } else if (event.shiftKey && (document.activeElement === first || document.activeElement === dialog)) {
+    event.preventDefault()
+    last.focus()
+  } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === dialog)) {
+    event.preventDefault()
+    first.focus()
+  }
+}
+
 function closeOnBackdrop(event) {
   if (event.target !== modalRef.value) return
   const rect = modalRef.value.getBoundingClientRect()
   if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeModal()
 }
 
+async function focusFormError() {
+  await nextTick()
+  const target = modalRef.value?.querySelector('[aria-invalid="true"]') || formErrorRef.value
+  target?.focus()
+}
+
 async function saveUser() {
   if (formSaving.value || rolesLoading.value || !roles.value.length) return
-  formSaving.value = true
   formError.value = ''
   fieldErrors.value = {}
   message.value = ''
+  const errors = {}
+  if (form.name.length < 3 || form.name.length > 100) errors.name = 'El nombre debe tener entre 3 y 100 caracteres.'
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) || form.email.length > 120) errors.email = 'Ingresa un correo válido de hasta 120 caracteres.'
+  if (!roles.value.includes(form.role)) errors.role = 'Selecciona un rol válido.'
+  if ((!editingUser.value || form.password) && (form.password.length < 6 || form.password.length > 72)) errors.password = 'La contraseña debe tener entre 6 y 72 caracteres.'
+  if (Object.keys(errors).length) {
+    fieldErrors.value = errors
+    formError.value = 'Revisa los datos del usuario.'
+    await focusFormError()
+    return
+  }
+  formSaving.value = true
   try {
     const payload = { name: form.name, email: form.email, role: form.role }
     if (!editingUser.value || form.password) payload.password = form.password
@@ -323,15 +362,14 @@ async function saveUser() {
     formError.value = e.message
     fieldErrors.value = e.fieldErrors || {}
     formSaving.value = false
-    await nextTick()
-    const focusTarget = modalRef.value?.querySelector('[aria-invalid="true"]') || formErrorRef.value
-    focusTarget?.focus()
+    await focusFormError()
   } finally {
     formSaving.value = false
   }
 }
 
 async function toggleStatus(item) {
+  if (savingId.value !== null) return
   message.value = ''
   error.value = ''
   savingId.value = item.id

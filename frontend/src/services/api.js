@@ -27,11 +27,21 @@ export async function apiRequest(path, options = {}) {
         : options.body
     })
   } catch {
-    throw new Error('No fue posible conectar con el servidor. Verifica que el backend esté encendido.')
+    const error = new Error('No fue posible conectar con el servidor. Verifica la conexión e inténtalo de nuevo.')
+    error.status = 0
+    throw error
   }
 
   const contentType = response.headers.get('content-type') || ''
-  const data = contentType.includes('application/json') ? await response.json() : null
+  let data = null
+  let invalidJson = false
+  if (contentType.includes('application/json')) {
+    try {
+      data = await response.json()
+    } catch {
+      invalidJson = true
+    }
+  }
 
   if (!response.ok) {
     if (response.status === 401) {
@@ -39,11 +49,26 @@ export async function apiRequest(path, options = {}) {
       localStorage.removeItem(TOKEN_KEY)
       if (window.location.pathname !== '/login') window.location.assign('/login')
     }
-    const error = new Error(data?.error || 'La solicitud no pudo completarse.')
+    const messages = {
+      400: 'Revisa los datos enviados.',
+      401: 'La sesión expiró o no es válida. Inicia sesión de nuevo.',
+      403: 'No tienes permisos para realizar esta acción.',
+      404: 'El recurso solicitado no existe.',
+      409: 'La operación entra en conflicto con los datos actuales.'
+    }
+    const fallback = response.status >= 500
+      ? 'El servidor no pudo completar la solicitud. Inténtalo de nuevo.'
+      : messages[response.status] || 'La solicitud no pudo completarse.'
+    const error = new Error(typeof data?.error === 'string' ? data.error : fallback)
     error.status = response.status
     error.fieldErrors = data?.fieldErrors || {}
     throw error
   }
 
+  if (invalidJson) {
+    const error = new Error('El servidor devolvió una respuesta inválida. Inténtalo de nuevo.')
+    error.status = response.status
+    throw error
+  }
   return data
 }

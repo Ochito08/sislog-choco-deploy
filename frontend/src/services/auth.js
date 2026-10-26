@@ -7,6 +7,7 @@ export async function login(email, password) {
     method: 'POST',
     body: { email: String(email || '').trim(), password }
   })
+  if (!data?.token || !data?.user) throw new Error('El servidor devolvió una sesión incompleta. Inténtalo de nuevo.')
   setToken(data.token)
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data.user))
   return data.user
@@ -14,6 +15,7 @@ export async function login(email, password) {
 
 export async function refreshCurrentUser() {
   const data = await apiRequest('/auth/me')
+  if (!data?.user) throw new Error('No fue posible verificar la sesión. Inténtalo de nuevo.')
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data.user))
   return data.user
 }
@@ -32,5 +34,5 @@ export function logout() {
 }
 
 export function isAuthenticated() {
-  return Boolean(getCurrentUser() && getToken())
+  return Boolean(getToken())
 }
