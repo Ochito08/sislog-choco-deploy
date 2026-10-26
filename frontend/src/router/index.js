@@ -116,16 +116,25 @@ const router = createRouter({
 })
 
 router.beforeEach(async to => {
-  if (to.meta.requiresAuth) {
+  if (to.meta.requiresAuth || (to.meta.guest && isAuthenticated())) {
     if (!isAuthenticated()) {
       return '/login'
     }
 
     try {
       await refreshCurrentUser()
-    } catch {
-      logout()
-      return '/login'
+    } catch (error) {
+      // Una caída de red no invalida el token ni borra la sesión guardada.
+      if (error.status === 401) logout()
+      if (to.meta.guest) {
+        if (error.status !== 401 && to.query.session !== 'unavailable') {
+          return { path: '/login', query: { ...to.query, session: 'unavailable' }, replace: true }
+        }
+        return
+      }
+      return error.status === 401
+        ? '/login'
+        : { path: '/login', query: { session: 'unavailable' } }
     }
   }
 
