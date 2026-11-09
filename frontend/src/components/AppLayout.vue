@@ -274,6 +274,64 @@
         <slot />
       </section>
     </main>
+
+    <nav class="mobile-dock" aria-label="Navegación móvil">
+      <RouterLink to="/dashboard" class="mobile-dock__item">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7" rx="2" />
+          <rect x="14" y="3" width="7" height="7" rx="2" />
+          <rect x="3" y="14" width="7" height="7" rx="2" />
+          <rect x="14" y="14" width="7" height="7" rx="2" />
+        </svg>
+        <span>Inicio</span>
+      </RouterLink>
+
+      <RouterLink to="/entregas" class="mobile-dock__item">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 7h13" />
+          <path d="m14 4 3 3-3 3" />
+          <path d="M20 17H7" />
+          <path d="m10 14-3 3 3 3" />
+        </svg>
+        <span>Entregas</span>
+      </RouterLink>
+
+      <RouterLink
+        v-if="canCreate"
+        to="/entregas/nueva"
+        class="mobile-dock__item mobile-dock__item--primary"
+        aria-label="Nueva entrega"
+      >
+        <span class="mobile-dock__plus">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+          </svg>
+        </span>
+        <span>Nueva</span>
+      </RouterLink>
+
+      <RouterLink to="/historial" class="mobile-dock__item">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="8" />
+          <path d="M12 8v4l3 2" />
+        </svg>
+        <span>Historial</span>
+      </RouterLink>
+
+      <RouterLink
+        v-if="user?.role === 'Administrador'"
+        to="/usuarios"
+        class="mobile-dock__item"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="9" cy="8" r="3" />
+          <path d="M3.5 19c.5-3.2 2.4-5 5.5-5s5 1.8 5.5 5" />
+          <circle cx="17.5" cy="9.5" r="2" />
+        </svg>
+        <span>Usuarios</span>
+      </RouterLink>
+    </nav>
   </div>
 </template>
 
@@ -1341,6 +1399,231 @@ onMounted(() => {
   .logout-button:hover,
   .menu-toggle:hover {
     transform: none;
+  }
+}
+
+
+/* ===============================
+   NAVEGACIÓN MÓVIL
+   =============================== */
+
+.mobile-dock {
+  display: none;
+}
+
+@media (max-width: 650px) {
+  .mobile-dock {
+    min-height: 66px;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    align-items: center;
+
+    position: fixed;
+    z-index: 32;
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    bottom: max(10px, env(safe-area-inset-bottom));
+
+    padding: 7px 8px;
+
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+
+    background: var(--surface-glass-strong, var(--bg-surface));
+    box-shadow:
+      0 16px 44px rgba(7, 42, 31, 0.18),
+      0 2px 8px rgba(7, 42, 31, 0.08);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .mobile-dock__item {
+    min-width: 0;
+    min-height: 51px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 3px;
+
+    border-radius: 14px;
+
+    color: var(--text-muted);
+    text-decoration: none;
+
+    font-size: 9px;
+    font-weight: 800;
+
+    transition:
+      color 0.16s ease,
+      background 0.16s ease,
+      transform 0.16s ease;
+  }
+
+  .mobile-dock__item > svg {
+    width: 20px;
+    height: 20px;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .mobile-dock__item.router-link-active:not(.mobile-dock__item--primary) {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .mobile-dock__item--primary {
+    color: var(--color-primary);
+  }
+
+  .mobile-dock__plus {
+    width: 37px;
+    height: 37px;
+
+    display: grid;
+    place-items: center;
+
+    margin-top: -19px;
+
+    border: 4px solid var(--bg-app);
+    border-radius: 13px;
+
+    background:
+      linear-gradient(145deg, var(--color-primary), var(--color-primary-hover));
+    color: #fff;
+
+    box-shadow: 0 10px 24px rgba(15, 107, 80, 0.3);
+  }
+
+  .mobile-dock__plus svg {
+    width: 19px;
+    height: 19px;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+  }
+
+  .page {
+    padding-bottom: max(112px, calc(96px + env(safe-area-inset-bottom))) !important;
+  }
+}
+
+
+/* ===============================
+   ACABADO PREMIUM DE LAYOUT
+   =============================== */
+
+@media (min-width: 901px) {
+  .app-shell {
+    --sidebar-width: 270px;
+  }
+
+  .sidebar {
+    border-right: 1px solid rgba(255, 255, 255, 0.055);
+    box-shadow:
+      18px 0 46px rgba(5, 35, 26, 0.08);
+  }
+
+  .brand {
+    min-height: 88px;
+    padding-inline: 22px;
+  }
+
+  .brand-mark {
+    width: 48px;
+    height: 48px;
+    border-radius: 15px;
+    box-shadow:
+      0 10px 24px rgba(0, 0, 0, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+
+  .workspace-label {
+    background:
+      linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.08),
+        rgba(255, 255, 255, 0.035)
+      );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  }
+
+  .nav-item {
+    min-height: 50px;
+  }
+
+  .nav-item.router-link-active {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.045),
+      0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .topbar {
+    height: 78px;
+    padding-inline: 32px;
+    box-shadow:
+      0 1px 0 rgba(0, 0, 0, 0.015),
+      0 8px 30px rgba(12, 48, 35, 0.035);
+  }
+
+  .page {
+    max-width: var(--content-max, 1540px);
+    padding: 32px 32px 52px;
+  }
+}
+
+.topbar {
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  backdrop-filter: blur(18px) saturate(135%);
+}
+
+.theme-toggle,
+.system-status {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.top-user {
+  padding-left: 4px;
+}
+
+@media (max-width: 650px) {
+  .topbar {
+    box-shadow:
+      0 1px 0 var(--border-color),
+      0 8px 24px rgba(10, 44, 33, 0.045);
+  }
+
+  .page-context strong {
+    font-size: 14px;
+  }
+
+  .topbar-right {
+    gap: 7px;
+  }
+
+  .theme-toggle,
+  .menu-toggle {
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    border-radius: 12px;
+  }
+
+  .avatar--top {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
   }
 }
 
