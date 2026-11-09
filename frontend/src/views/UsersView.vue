@@ -410,4 +410,70 @@ dialog.modal{margin:auto;padding:0;color:inherit;width:min(calc(100% - 40px),660
 @media(max-width:620px){.filters{grid-template-columns:minmax(0,1fr)}.search-field,.filter-actions{grid-column:auto}.filter-actions{display:grid;grid-template-columns:1fr 1fr}.table-wrap{overflow:visible;padding:12px;background:#f9fbf9}table,tbody{display:block;width:100%;min-width:0}thead{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}tbody tr{display:block;margin-bottom:12px;padding:6px 16px;border:1px solid #e2eae3;border-radius:12px;background:#fff;box-shadow:0 2px 8px rgba(22,74,58,.025)}tbody tr:last-child{margin-bottom:0}tbody tr:hover{background:#fff}td{display:grid;grid-template-columns:80px minmax(0,1fr);align-items:center;gap:11px;min-width:0;padding:12px 0;border-bottom:1px solid #eff2ef}tbody tr:last-child td{border-bottom:1px solid #eff2ef}tbody tr td:last-child,tbody tr:last-child td:last-child{border-bottom:0}td::before{content:attr(data-label);font-size:10px;font-weight:850;letter-spacing:.025em;color:#819186}th{display:none}.identity{min-width:0}.avatar{width:38px;height:38px;border-radius:10px}.identity-text span{font-size:10px}.row-actions{gap:6px}.action-button{min-height:35px}.role-pill{max-width:100%;white-space:normal}.modal-backdrop{align-items:end;padding:8px}.modal{max-height:calc(100dvh - 16px);border-radius:16px}.modal-heading{padding:21px 19px 17px}.user-form{padding:20px 19px}.form-grid{grid-template-columns:minmax(0,1fr);gap:15px}.modal-actions{display:grid;grid-template-columns:1fr 1fr}.modal-actions .button{padding:0 8px}.overview-icon{width:46px;height:46px}.overview-text strong{font-size:26px}}
 @media(max-width:370px){.page-heading h1{font-size:25px}.directory-heading{align-items:flex-start;flex-direction:column}.filter-actions{grid-template-columns:1fr}.identity{gap:8px}td{grid-template-columns:65px minmax(0,1fr);gap:9px}.row-actions{align-items:stretch}.action-button{flex:1}}
 @media(prefers-reduced-motion:reduce){.loading-ring{animation:none}.button,.action-button{transition:none}}
+
+/* Coherencia con el tema oscuro global */
+:global(html[data-theme="dark"]) .users-page {
+  --green: var(--color-primary);
+  --green-2: var(--color-primary-hover);
+  --line: var(--border-color);
+  --muted: var(--text-muted);
+  --ink: var(--text-primary);
+}
+
+:global(html[data-theme="dark"]) .users-page .panel,
+:global(html[data-theme="dark"]) .users-page .overview,
+:global(html[data-theme="dark"]) .users-page .overview-label,
+:global(html[data-theme="dark"]) .users-page .button-secondary,
+:global(html[data-theme="dark"]) .users-page .modal,
+:global(html[data-theme="dark"]) .users-page .close-button,
+:global(html[data-theme="dark"]) .users-page input,
+:global(html[data-theme="dark"]) .users-page select {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+:global(html[data-theme="dark"]) .users-page .overview {
+  background: linear-gradient(110deg, var(--color-primary-soft), var(--bg-surface) 72%);
+}
+
+:global(html[data-theme="dark"]) .users-page .overview-text strong,
+:global(html[data-theme="dark"]) .users-page .identity-text strong,
+:global(html[data-theme="dark"]) .users-page .filter-field,
+:global(html[data-theme="dark"]) .users-page .form-field {
+  color: var(--text-primary);
+}
+
+:global(html[data-theme="dark"]) .users-page .page-heading p,
+:global(html[data-theme="dark"]) .users-page .overview-description,
+:global(html[data-theme="dark"]) .users-page .identity-text span,
+:global(html[data-theme="dark"]) .users-page .panel-heading p,
+:global(html[data-theme="dark"]) .users-page .directory-heading p {
+  color: var(--text-muted);
+}
+
+:global(html[data-theme="dark"]) .users-page thead,
+:global(html[data-theme="dark"]) .users-page tbody tr:hover,
+:global(html[data-theme="dark"]) .users-page .form-tip,
+:global(html[data-theme="dark"]) .users-page .section-label,
+:global(html[data-theme="dark"]) .users-page .role-pill {
+  background: var(--bg-surface-secondary);
+}
+
+:global(html[data-theme="dark"]) .users-page th,
+:global(html[data-theme="dark"]) .users-page td,
+:global(html[data-theme="dark"]) .users-page .directory-heading,
+:global(html[data-theme="dark"]) .users-page .modal-heading,
+:global(html[data-theme="dark"]) .users-page .modal-actions {
+  border-color: var(--border-soft);
+}
+
+@media (max-width: 620px) {
+  :global(html[data-theme="dark"]) .users-page .table-wrap,
+  :global(html[data-theme="dark"]) .users-page tbody tr {
+    background: var(--bg-surface);
+    border-color: var(--border-color);
+  }
+}
+
 </style>

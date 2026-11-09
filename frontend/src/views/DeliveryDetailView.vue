@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <AppLayout title="Detalle de entrega">
     <div class="detail-page">
       <!-- ENCABEZADO -->
@@ -496,6 +496,48 @@
                 </span>
               </div>
 
+              <div
+                v-if="canManageDelivery"
+                class="manage-actions"
+              >
+                <RouterLink
+                  :to="`/entregas/${delivery.id}/editar`"
+                  class="manage-button edit-button"
+                  :class="{ disabled: deleting }"
+                >
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" />
+                  </svg>
+
+                  Editar
+                </RouterLink>
+
+                <button
+                  type="button"
+                  class="manage-button delete-button"
+                  :disabled="deleting || working"
+                  @click="removeDelivery"
+                >
+                  <span
+                    v-if="deleting"
+                    class="button-loader"
+                  ></span>
+
+                  <svg
+                    v-else
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V4h6v3" />
+                    <path d="M6 7l1 13h10l1-13" />
+                    <path d="M10 11v5M14 11v5" />
+                  </svg>
+
+                  {{ deleting ? 'Eliminando...' : 'Eliminar' }}
+                </button>
+              </div>
+
               <div class="action-note">
                 <svg viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="9" />
@@ -607,13 +649,15 @@ import {
 } from 'vue'
 
 import {
-  useRoute
+  useRoute,
+  useRouter
 } from 'vue-router'
 
 import AppLayout from '../components/AppLayout.vue'
 
 import {
   confirmReception,
+  deleteDelivery,
   getDelivery,
   updateDeliveryStatus
 } from '../services/deliveries'
@@ -623,11 +667,13 @@ import {
 } from '../services/auth'
 
 const route = useRoute()
+const router = useRouter()
 const user = getCurrentUser()
 
 const delivery = ref(null)
 const loading = ref(true)
 const working = ref(false)
+const deleting = ref(false)
 const error = ref('')
 
 const elevatedRoles = [
@@ -661,6 +707,14 @@ const canAdvance = computed(() => {
 
 const canReceive = computed(() =>
   receptionRoles.includes(user?.role)
+)
+
+const canManageDelivery = computed(() =>
+  Boolean(
+    delivery.value &&
+    elevatedRoles.includes(user?.role) &&
+    delivery.value.estado === 'Pendiente'
+  )
 )
 
 const reversedEvents = computed(() => {
@@ -726,6 +780,34 @@ async function confirmDeliveryReception() {
       err.message
   } finally {
     working.value = false
+  }
+}
+
+async function removeDelivery() {
+  if (!canManageDelivery.value || deleting.value) {
+    return
+  }
+
+  const confirmed = window.confirm(
+    `¿Seguro que deseas eliminar la entrega #${delivery.value.id}? Esta acción no se puede deshacer.`
+  )
+
+  if (!confirmed) {
+    return
+  }
+
+  deleting.value = true
+  error.value = ''
+
+  try {
+    await deleteDelivery(route.params.id)
+    await router.push('/entregas')
+  } catch (err) {
+    error.value =
+      err.message ||
+      'No fue posible eliminar la entrega.'
+  } finally {
+    deleting.value = false
   }
 }
 
@@ -1742,6 +1824,85 @@ h1 {
 
   font-size: 11px;
   line-height: 1.5;
+}
+
+.manage-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  margin-top: 16px;
+}
+
+.manage-button {
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 10px 14px;
+
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  text-decoration: none;
+  cursor: pointer;
+
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.manage-button svg {
+  width: 17px;
+  height: 17px;
+
+  fill: none;
+  stroke: currentColor;
+
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.edit-button {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.edit-button:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.delete-button {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.delete-button:hover:not(:disabled) {
+  border-color: var(--color-danger);
+  transform: translateY(-1px);
+}
+
+.manage-button:disabled,
+.manage-button.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: wait;
+}
+
+@media (max-width: 520px) {
+  .manage-actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* HISTORIAL */

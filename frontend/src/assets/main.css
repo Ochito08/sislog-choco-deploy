@@ -385,3 +385,80 @@ p {
     font-size: 15px;
   }
 }
+
+/* =========================================================
+   CALIDAD RESPONSIVE / MÓVIL
+   ========================================================= */
+
+body {
+  overflow-x: hidden;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  button,
+  .sislog-button {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: clamp(1.65rem, 8vw, 2rem);
+  }
+
+  h2 {
+    font-size: clamp(1.1rem, 5.6vw, 1.35rem);
+  }
+}
+
+@media (hover: none) {
+  .sislog-button:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

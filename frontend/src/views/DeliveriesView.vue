@@ -367,16 +367,51 @@
               </div>
             </div>
 
-            <RouterLink
-              :to="`/entregas/${delivery.id}`"
-              class="detail-link"
-            >
-              <span>Ver detalle</span>
+            <div class="card-actions">
+              <RouterLink
+                :to="`/entregas/${delivery.id}`"
+                class="detail-link"
+              >
+                <span>Ver detalle</span>
 
-              <svg viewBox="0 0 24 24">
-                <path d="m9 6 6 6-6 6" />
-              </svg>
-            </RouterLink>
+                <svg viewBox="0 0 24 24">
+                  <path d="m9 6 6 6-6 6" />
+                </svg>
+              </RouterLink>
+
+              <template v-if="canManage(delivery)">
+                <RouterLink
+                  :to="`/entregas/${delivery.id}/editar`"
+                  class="quick-action quick-action--edit"
+                  aria-label="Editar entrega"
+                >
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" />
+                  </svg>
+                  <span>Editar</span>
+                </RouterLink>
+
+                <button
+                  type="button"
+                  class="quick-action quick-action--delete"
+                  :disabled="deletingId === delivery.id"
+                  @click="removeDelivery(delivery)"
+                >
+                  <span
+                    v-if="deletingId === delivery.id"
+                    class="mini-spinner"
+                    aria-hidden="true"
+                  ></span>
+                  <svg v-else viewBox="0 0 24 24">
+                    <path d="M4 7h16" />
+                    <path d="M9 7V4h6v3" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                  <span>{{ deletingId === delivery.id ? 'Eliminando...' : 'Eliminar' }}</span>
+                </button>
+              </template>
+            </div>
           </article>
         </div>
       </section>
@@ -399,11 +434,13 @@ import {
 } from '../services/auth'
 
 import {
+  deleteDelivery,
   listDeliveries
 } from '../services/deliveries'
 
 const deliveries = ref([])
 const loading = ref(false)
+const deletingId = ref(null)
 const error = ref('')
 
 const user = getCurrentUser()
@@ -420,6 +457,13 @@ const canCreate = computed(() =>
     'Administrador'
   ].includes(user?.role)
 )
+
+function canManage(delivery) {
+  return Boolean(
+    canCreate.value &&
+    delivery?.estado === 'Pendiente'
+  )
+}
 
 function countStatus(status) {
   return deliveries.value.filter(
@@ -456,6 +500,30 @@ async function clearFilters() {
   filters.destination = ''
 
   await loadDeliveries()
+}
+
+async function removeDelivery(delivery) {
+  if (!canManage(delivery) || deletingId.value !== null) return
+
+  const confirmed = window.confirm(
+    `¿Eliminar la entrega #${delivery.id}? Esta acción no se puede deshacer.`
+  )
+
+  if (!confirmed) return
+
+  deletingId.value = delivery.id
+  error.value = ''
+
+  try {
+    await deleteDelivery(delivery.id)
+    deliveries.value = deliveries.value.filter(
+      item => item.id !== delivery.id
+    )
+  } catch (err) {
+    error.value = err.message || 'No fue posible eliminar la entrega.'
+  } finally {
+    deletingId.value = null
+  }
 }
 
 onMounted(loadDeliveries)
@@ -1314,6 +1382,70 @@ select:focus {
   stroke-linejoin: round;
 }
 
+.card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.quick-action {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.quick-action svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.quick-action--edit {
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.quick-action--delete {
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
+}
+
+.quick-action:hover:not(:disabled) {
+  border-color: currentColor;
+  transform: translateY(-1px);
+}
+
+.quick-action:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+.mini-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
 /* VACÍO Y CARGA */
 
 .empty-state {
@@ -1485,7 +1617,9 @@ select:focus {
     flex-wrap: wrap;
   }
 
-  .detail-link {
+  .card-actions {
+    width: 100%;
+    justify-content: flex-end;
     margin-left: 64px;
   }
 }
@@ -1536,10 +1670,21 @@ select:focus {
     flex-wrap: wrap;
   }
 
+  .card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    margin-left: 0;
+  }
+
   .detail-link {
+    grid-column: 1 / -1;
     width: 100%;
     justify-content: center;
-    margin-left: 0;
+  }
+
+  .quick-action {
+    width: 100%;
   }
 }
 </style>

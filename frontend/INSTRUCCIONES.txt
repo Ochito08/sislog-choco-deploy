@@ -1,0 +1,21 @@
+SISLOG-CHOCÓ - PARCHE ACTIVIDAD 6 / PREPARACIÓN ACTIVIDAD 7
+
+Este ZIP contiene únicamente archivos que deben reemplazarse dentro de la carpeta frontend.
+
+CAMBIOS PRINCIPALES:
+- Corrige la codificación dañada de DeliveryDetailView.vue.
+- Repara permisos de Coordinador logístico y comparaciones de En tránsito.
+- Activa Editar y Eliminar en el detalle de entregas Pendientes.
+- Añade Editar y Eliminar directamente al listado de entregas Pendientes.
+- Al eliminar desde el listado, la UI se actualiza sin recargar.
+- Mejora responsive/touch global para tablet y móvil.
+- Mejora navegación lateral y safe areas en móvil.
+- Hace Usuarios coherente con modo oscuro.
+- Prepara VITE_API_URL y Vite para despliegue y pruebas desde celular.
+
+DESPUÉS DE REEMPLAZAR:
+1. cd frontend
+2. npm run build
+3. Inicia backend y frontend.
+4. Prueba con Coordinador o Administrador y una entrega Pendiente.
+5. Debes ver Editar y Eliminar tanto en la lista como en el detalle.

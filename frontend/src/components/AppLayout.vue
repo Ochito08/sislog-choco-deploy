@@ -1301,4 +1301,47 @@ onMounted(() => {
     height: 37px;
   }
 }
+
+/* Ajustes de calidad para tablet y móvil */
+@media (max-width: 900px) {
+  .sidebar {
+    height: 100dvh;
+    min-height: 100dvh;
+    overscroll-behavior: contain;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .main {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 650px) {
+  .topbar {
+    padding-left: max(13px, env(safe-area-inset-left));
+    padding-right: max(13px, env(safe-area-inset-right));
+  }
+
+  .page {
+    padding-left: max(13px, env(safe-area-inset-left));
+    padding-right: max(13px, env(safe-area-inset-right));
+    padding-bottom: max(34px, env(safe-area-inset-bottom));
+  }
+
+  .nav-item,
+  .theme-toggle,
+  .menu-toggle,
+  .logout-button {
+    min-height: 44px;
+  }
+}
+
+@media (hover: none) {
+  .nav-item:hover,
+  .logout-button:hover,
+  .menu-toggle:hover {
+    transform: none;
+  }
+}
+
 </style>
