@@ -14,6 +14,7 @@ import EditDeliveryView from '../views/EditDeliveryView.vue'
 import DeliveryDetailView from '../views/DeliveryDetailView.vue'
 import HistoryView from '../views/HistoryView.vue'
 import UsersView from '../views/UsersView.vue'
+import InventoryView from '../views/InventoryView.vue'
 
 const routes = [
   {
@@ -87,6 +88,15 @@ const routes = [
     path: '/historial',
     name: 'history',
     component: HistoryView,
+    meta: {
+      requiresAuth: true
+    }
+  },
+
+  {
+    path: '/inventario',
+    name: 'inventory',
+    component: InventoryView,
     meta: {
       requiresAuth: true
     }

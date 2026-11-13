@@ -91,6 +91,21 @@
           </RouterLink>
 
           <RouterLink
+            to="/inventario"
+            class="nav-item"
+            @click="closeMenu"
+          >
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 7.5 12 3l8 4.5-8 4.5-8-4.5Z" />
+                <path d="M4 12l8 4.5 8-4.5" />
+                <path d="M4 16.5 12 21l8-4.5" />
+              </svg>
+            </span>
+            <span>Inventario</span>
+          </RouterLink>
+
+          <RouterLink
             to="/historial"
             class="nav-item"
             @click="closeMenu"
@@ -309,6 +324,14 @@
           </svg>
         </span>
         <span>Nueva</span>
+      </RouterLink>
+
+      <RouterLink to="/inventario" class="mobile-dock__item">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 7.5 12 3l8 4.5-8 4.5-8-4.5Z" />
+          <path d="M4 12l8 4.5 8-4.5" />
+        </svg>
+        <span>Stock</span>
       </RouterLink>
 
       <RouterLink to="/historial" class="mobile-dock__item">
